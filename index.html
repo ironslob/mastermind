@@ -105,7 +105,19 @@
       </div>
       <h3>Guess Distribution</h3>
       <div id="distribution" class="distribution"></div>
+      <button type="button" id="clear-stats-btn" class="clear-stats-btn">Clear stats</button>
       <p class="modal-footer" id="next-puzzle"></p>
+    </div>
+  </dialog>
+
+  <dialog id="clear-stats-modal" class="modal">
+    <div class="modal-content">
+      <h2>Clear statistics?</h2>
+      <p class="confirm-body">This permanently deletes all your stats and game history. You can play today's puzzle again from scratch.</p>
+      <div class="action-row">
+        <button type="button" id="clear-stats-cancel" class="stats-btn">Cancel</button>
+        <button type="button" id="clear-stats-confirm" class="clear-btn">Clear</button>
+      </div>
     </div>
   </dialog>
 

@@ -157,6 +157,11 @@ export function saveStats(stats) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
 }
 
+export function clearStats() {
+  localStorage.removeItem(STORAGE_KEY);
+  return defaultStats();
+}
+
 export function getTodayGame(stats, dateKey = getDateKey()) {
   return stats.games[dateKey] ?? null;
 }

@@ -12,6 +12,7 @@ import {
   saveInProgress,
   buildShareTextWithUrl,
   winPercentage,
+  clearStats,
   hasSeenIntro,
   markIntroSeen,
   getTheme,
@@ -45,6 +46,10 @@ const els = {
   toast: document.getElementById('toast'),
   statsModal: document.getElementById('stats-modal'),
   statsClose: document.getElementById('stats-close'),
+  clearStatsBtn: document.getElementById('clear-stats-btn'),
+  clearStatsModal: document.getElementById('clear-stats-modal'),
+  clearStatsCancel: document.getElementById('clear-stats-cancel'),
+  clearStatsConfirm: document.getElementById('clear-stats-confirm'),
   resultModal: document.getElementById('result-modal'),
   resultTitle: document.getElementById('result-title'),
   resultSubtitle: document.getElementById('result-subtitle'),
@@ -399,6 +404,29 @@ function showStatsModal() {
   els.statsModal.showModal();
 }
 
+function resetToFreshGame() {
+  els.completedView.classList.add('hidden');
+  els.gameArea.classList.remove('hidden');
+  state.history = [];
+  state.currentGuess = Array(CONFIG.pegCount).fill(null);
+  state.gameOver = false;
+  renderBoard();
+  renderCurrentGuess();
+  updateSubmitButton();
+}
+
+function confirmClearStats() {
+  els.clearStatsModal.showModal();
+}
+
+function handleClearStats() {
+  state.stats = clearStats();
+  resetToFreshGame();
+  els.clearStatsModal.close();
+  els.statsModal.close();
+  showToast('Stats cleared');
+}
+
 function getShareContent() {
   const todayGame = getTodayGame(state.stats, state.dateKey);
   return buildShareTextWithUrl(
@@ -455,6 +483,9 @@ function bindEvents() {
   els.shareBtn.addEventListener('click', shareScore);
   els.statsBtn.addEventListener('click', showStatsModal);
   els.statsClose.addEventListener('click', () => els.statsModal.close());
+  els.clearStatsBtn.addEventListener('click', confirmClearStats);
+  els.clearStatsCancel.addEventListener('click', () => els.clearStatsModal.close());
+  els.clearStatsConfirm.addEventListener('click', handleClearStats);
 
   els.resultShareBtn.addEventListener('click', shareScore);
   els.resultStatsBtn.addEventListener('click', () => {

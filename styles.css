@@ -722,3 +722,52 @@ body {
   font-size: 0.875rem;
   margin: 16px 0 0;
 }
+
+.clear-stats-btn {
+  display: block;
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.clear-stats-btn:active {
+  opacity: 0.7;
+}
+
+.confirm-body {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.clear-btn {
+  flex: 1;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--danger);
+  color: white;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.clear-btn:active {
+  opacity: 0.85;
+}
+
+.action-row .clear-btn {
+  margin-bottom: 0;
+}
