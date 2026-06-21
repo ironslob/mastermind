@@ -42,24 +42,23 @@
     <main id="game-area">
       <div id="board" class="board" aria-label="Guess history"></div>
 
-      <div class="input-dock">
+      <div id="play-dock" class="input-dock">
         <button type="button" id="submit-btn" class="submit-btn" disabled>Submit</button>
         <div id="current-row" class="current-row" aria-label="Current guess">
           <div class="guess-slots" id="guess-slots"></div>
         </div>
         <div id="palette" class="palette" aria-label="Color palette"></div>
       </div>
-    </main>
 
-    <div id="completed-view" class="completed-view hidden">
-      <p id="completed-message" class="completed-message"></p>
-      <div id="completed-secret" class="secret-code hidden" aria-label="Today's code"></div>
-      <div id="completed-board" class="completed-board"></div>
-      <div class="action-row">
-        <button type="button" id="share-btn" class="share-btn">Share</button>
-        <button type="button" id="stats-btn" class="stats-btn">Stats</button>
+      <div id="completed-dock" class="input-dock hidden">
+        <p id="completed-message" class="completed-message"></p>
+        <div id="completed-secret" class="secret-code hidden" aria-label="Today's code"></div>
+        <div class="action-row">
+          <button type="button" id="share-btn" class="share-btn">Share</button>
+          <button type="button" id="stats-btn" class="stats-btn">Stats</button>
+        </div>
       </div>
-    </div>
+    </main>
 
     <div id="toast" class="toast hidden" role="status"></div>
   </div>

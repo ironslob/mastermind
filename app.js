@@ -34,13 +34,13 @@ const els = {
   puzzleInfo: document.getElementById('puzzle-info'),
   gameArea: document.getElementById('game-area'),
   board: document.getElementById('board'),
+  playDock: document.getElementById('play-dock'),
+  completedDock: document.getElementById('completed-dock'),
   guessSlots: document.getElementById('guess-slots'),
   submitBtn: document.getElementById('submit-btn'),
   palette: document.getElementById('palette'),
-  completedView: document.getElementById('completed-view'),
   completedMessage: document.getElementById('completed-message'),
   completedSecret: document.getElementById('completed-secret'),
-  completedBoard: document.getElementById('completed-board'),
   shareBtn: document.getElementById('share-btn'),
   statsBtn: document.getElementById('stats-btn'),
   toast: document.getElementById('toast'),
@@ -111,14 +111,18 @@ function restoreOrStart() {
     state.currentGuess = todayGame.currentGuess ?? Array(CONFIG.pegCount).fill(null);
   }
 
+  showPlayView();
   renderBoard();
   renderCurrentGuess();
   updateSubmitButton();
 }
 
 function showCompletedView(game) {
-  els.gameArea.classList.add('hidden');
-  els.completedView.classList.remove('hidden');
+  state.history = game.history ?? [];
+  state.gameOver = true;
+
+  els.playDock.classList.add('hidden');
+  els.completedDock.classList.remove('hidden');
 
   if (game.won) {
     els.completedMessage.textContent = `You solved it in ${game.guessCount} ${game.guessCount === 1 ? 'guess' : 'guesses'}!`;
@@ -130,7 +134,12 @@ function showCompletedView(game) {
     els.completedSecret.classList.remove('hidden');
   }
 
-  renderHistoryBoard(els.completedBoard, game.history);
+  renderBoard(true);
+}
+
+function showPlayView() {
+  els.completedDock.classList.add('hidden');
+  els.playDock.classList.remove('hidden');
 }
 
 const LEGACY_COLOR_NAMES = {
@@ -232,14 +241,9 @@ function renderCurrentGuess() {
   });
 }
 
-function renderBoard() {
+function renderBoard(staticBoard = false) {
   els.board.className = 'board';
-  renderBoardColumns(els.board, state.history);
-}
-
-function renderHistoryBoard(container, history) {
-  container.className = 'board completed-board';
-  renderBoardColumns(container, history, true);
+  renderBoardColumns(els.board, state.history, staticBoard || state.gameOver);
 }
 
 function renderBoardColumns(container, history, staticBoard = false) {
@@ -418,8 +422,7 @@ function showStatsModal() {
 }
 
 function resetToFreshGame() {
-  els.completedView.classList.add('hidden');
-  els.gameArea.classList.remove('hidden');
+  showPlayView();
   state.history = [];
   state.currentGuess = Array(CONFIG.pegCount).fill(null);
   state.gameOver = false;
