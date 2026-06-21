@@ -133,10 +133,23 @@ function showCompletedView(game) {
   renderHistoryBoard(els.completedBoard, game.history);
 }
 
+const LEGACY_COLOR_NAMES = {
+  Red: 0,
+  Blue: 1,
+  Green: 2,
+  Yellow: 3,
+  Orange: 4,
+  Purple: 5,
+  Pink: 6,
+  Teal: 7,
+};
+
 function normalizeSecretCode(revealedCode) {
   if (!revealedCode?.length) return null;
   if (typeof revealedCode[0] === 'number') return revealedCode;
-  return revealedCode.map((name) => COLORS.find((c) => c.name === name)?.id ?? 0);
+  return revealedCode.map(
+    (name) => LEGACY_COLOR_NAMES[name] ?? COLORS.find((c) => c.name === name)?.id ?? 0,
+  );
 }
 
 function renderSecretCode(container, secret) {

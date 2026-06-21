@@ -16,9 +16,6 @@
   --danger: #dc2626;
   --slot-empty: #e5e7eb;
   --slot-border: #9ca3af;
-  --feedback-black: #1a1a1a;
-  --feedback-white: #f3f4f6;
-  --feedback-border: #9ca3af;
   --radius: 12px;
   --peg-size: clamp(34px, 9vw, 44px);
   --peg-size-compact: min(7vw, calc((100dvh - 260px) / 10 - 5px), 26px);
@@ -35,9 +32,6 @@
   --border: #3f3f46;
   --slot-empty: #27272a;
   --slot-border: #52525b;
-  --feedback-black: #f4f4f5;
-  --feedback-white: #52525b;
-  --feedback-border: #71717a;
   color-scheme: dark;
 }
 
@@ -270,27 +264,31 @@ body {
 .feedback {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  width: calc(var(--feedback-size) * 2 + 4px);
-  min-height: calc(var(--feedback-size) * 2 + 4px);
+  gap: 3px;
+  width: calc(var(--feedback-size) * 2 + 7px);
+  min-height: calc(var(--feedback-size) * 2 + 7px);
   align-content: flex-start;
   justify-content: flex-end;
+  padding: 3px;
+  border-radius: 5px;
+  background: #a3a3a3;
 }
 
 .feedback-peg {
   width: var(--feedback-size);
   height: var(--feedback-size);
   border-radius: 50%;
-  border: 1.5px solid var(--feedback-border);
+  box-sizing: border-box;
 }
 
 .feedback-peg.black {
-  background: var(--feedback-black);
-  border-color: var(--feedback-black);
+  background: #000000;
+  border: 2px solid #ffffff;
 }
 
 .feedback-peg.white {
-  background: var(--feedback-white);
+  background: #ffffff;
+  border: 2px solid #000000;
 }
 
 .feedback-compact {
@@ -302,12 +300,16 @@ body {
   flex-shrink: 0;
   align-self: center;
   justify-self: end;
+  padding: 2px;
+  border-radius: 4px;
+  background: #a3a3a3;
+  box-sizing: content-box;
 }
 
 .feedback-compact .feedback-peg {
   width: var(--feedback-size-compact);
   height: var(--feedback-size-compact);
-  border-width: 1px;
+  border-width: 1.5px;
   justify-self: center;
 }
 
@@ -316,7 +318,7 @@ body {
   width: var(--peg-size);
   height: var(--peg-size);
   border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(0, 0, 0, 0.22);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   -webkit-tap-highlight-color: transparent;
@@ -378,10 +380,15 @@ body {
   gap: 8px;
 }
 
+.peg:not(.empty),
+.palette-btn {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
 .palette-btn {
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(0, 0, 0, 0.22);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   -webkit-tap-highlight-color: transparent;
@@ -468,16 +475,17 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 1.5px solid var(--feedback-border);
+  box-sizing: border-box;
 }
 
 .legend-peg.black {
-  background: var(--feedback-black);
-  border-color: var(--feedback-black);
+  background: #000000;
+  border: 2px solid #ffffff;
 }
 
 .legend-peg.white {
-  background: var(--feedback-white);
+  background: #ffffff;
+  border: 2px solid #000000;
 }
 
 .intro-modal .share-btn {

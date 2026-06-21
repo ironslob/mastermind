@@ -1,12 +1,13 @@
+// Paul Tol bright-inspired palette: distinguishable for common colour-vision deficiencies.
 export const COLORS = [
-  { id: 0, name: 'Red', hex: '#E53935' },
-  { id: 1, name: 'Blue', hex: '#1E88E5' },
-  { id: 2, name: 'Green', hex: '#43A047' },
-  { id: 3, name: 'Yellow', hex: '#FDD835' },
-  { id: 4, name: 'Orange', hex: '#FB8C00' },
-  { id: 5, name: 'Purple', hex: '#8E24AA' },
-  { id: 6, name: 'Pink', hex: '#EC407A' },
-  { id: 7, name: 'Teal', hex: '#00ACC1' },
+  { id: 0, name: 'Blue', hex: '#4477AA' },
+  { id: 1, name: 'Rose', hex: '#EE6677' },
+  { id: 2, name: 'Green', hex: '#228833' },
+  { id: 3, name: 'Gold', hex: '#CCBB44' },
+  { id: 4, name: 'Cyan', hex: '#66CCEE' },
+  { id: 5, name: 'Purple', hex: '#AA3377' },
+  { id: 6, name: 'Orange', hex: '#EE7733' },
+  { id: 7, name: 'Grey', hex: '#999999' },
 ];
 
 export const CONFIG = {
