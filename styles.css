@@ -497,6 +497,7 @@ body {
 }
 
 .intro-modal .share-btn {
+  align-self: stretch;
   max-width: none;
   margin: 0;
 }
@@ -506,7 +507,7 @@ body {
   gap: 10px;
   width: 100%;
   max-width: 320px;
-  margin-bottom: 10px;
+  margin: 0 auto 10px;
 }
 
 .action-row .share-btn,
@@ -553,6 +554,8 @@ body {
   background: transparent;
   color: var(--text-muted);
   font-weight: 500;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .toast {
@@ -594,11 +597,15 @@ body {
 .modal-content {
   padding: 24px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .stats-modal .modal-content {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   max-height: 85dvh;
   padding-bottom: 20px;
 }
