@@ -1,0 +1,444 @@
+import {
+  COLORS,
+  CONFIG,
+  getDateKey,
+  getPuzzleNumber,
+  generateSecretCode,
+  scoreGuess,
+  isWinningGuess,
+  loadStats,
+  getTodayGame,
+  recordGameResult,
+  saveInProgress,
+  buildShareTextWithUrl,
+  winPercentage,
+  hasSeenIntro,
+  markIntroSeen,
+  getTheme,
+  setTheme,
+  toggleTheme,
+} from './game.js';
+
+const state = {
+  dateKey: getDateKey(),
+  puzzleNumber: getPuzzleNumber(),
+  secret: generateSecretCode(getDateKey()),
+  stats: loadStats(),
+  history: [],
+  currentGuess: Array(CONFIG.pegCount).fill(null),
+  gameOver: false,
+};
+
+const els = {
+  puzzleInfo: document.getElementById('puzzle-info'),
+  gameArea: document.getElementById('game-area'),
+  board: document.getElementById('board'),
+  guessSlots: document.getElementById('guess-slots'),
+  submitBtn: document.getElementById('submit-btn'),
+  palette: document.getElementById('palette'),
+  completedView: document.getElementById('completed-view'),
+  completedMessage: document.getElementById('completed-message'),
+  completedBoard: document.getElementById('completed-board'),
+  shareBtn: document.getElementById('share-btn'),
+  statsBtn: document.getElementById('stats-btn'),
+  toast: document.getElementById('toast'),
+  statsModal: document.getElementById('stats-modal'),
+  statsClose: document.getElementById('stats-close'),
+  resultModal: document.getElementById('result-modal'),
+  resultTitle: document.getElementById('result-title'),
+  resultSubtitle: document.getElementById('result-subtitle'),
+  resultShareBtn: document.getElementById('result-share-btn'),
+  resultStatsBtn: document.getElementById('result-stats-btn'),
+  resultCloseBtn: document.getElementById('result-close-btn'),
+  introModal: document.getElementById('intro-modal'),
+  introPlayBtn: document.getElementById('intro-play-btn'),
+  helpBtn: document.getElementById('help-btn'),
+  themeBtn: document.getElementById('theme-btn'),
+};
+
+function init() {
+  els.puzzleInfo.textContent = `#${state.puzzleNumber} · ${formatDisplayDate(state.dateKey)}`;
+
+  syncThemeToggle();
+  renderPalette();
+  restoreOrStart();
+  bindEvents();
+
+  if (!hasSeenIntro()) {
+    showIntro();
+  }
+}
+
+function showIntro() {
+  els.introModal.showModal();
+}
+
+function syncThemeToggle() {
+  const theme = getTheme();
+  setTheme(theme);
+  els.themeBtn.setAttribute(
+    'aria-label',
+    theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+  );
+}
+
+function formatDisplayDate(dateKey) {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function restoreOrStart() {
+  const todayGame = getTodayGame(state.stats, state.dateKey);
+
+  if (todayGame?.completed) {
+    showCompletedView(todayGame);
+    return;
+  }
+
+  if (todayGame && !todayGame.completed) {
+    state.history = todayGame.history ?? [];
+    state.currentGuess = todayGame.currentGuess ?? Array(CONFIG.pegCount).fill(null);
+  }
+
+  renderBoard();
+  renderCurrentGuess();
+  updateSubmitButton();
+}
+
+function showCompletedView(game) {
+  els.gameArea.classList.add('hidden');
+  els.completedView.classList.remove('hidden');
+
+  if (game.won) {
+    els.completedMessage.textContent = `You solved it in ${game.guessCount} ${game.guessCount === 1 ? 'guess' : 'guesses'}!`;
+  } else {
+    els.completedMessage.textContent = `Better luck tomorrow! The code was ${game.revealedCode?.join(', ') ?? 'hidden'}.`;
+  }
+
+  renderHistoryBoard(els.completedBoard, game.history);
+}
+
+function colorName(colorId) {
+  return COLORS[colorId]?.name ?? '?';
+}
+
+function colorHex(colorId) {
+  return COLORS[colorId]?.hex ?? '#ccc';
+}
+
+function renderPalette() {
+  els.palette.innerHTML = '';
+  COLORS.forEach((color) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'palette-btn';
+    btn.style.background = color.hex;
+    btn.setAttribute('aria-label', color.name);
+    btn.dataset.colorId = color.id;
+    btn.addEventListener('click', () => addColorToGuess(color.id));
+    els.palette.appendChild(btn);
+  });
+}
+
+function firstEmptySlot() {
+  return state.currentGuess.findIndex((c) => c === null);
+}
+
+function addColorToGuess(colorId) {
+  if (state.gameOver) return;
+
+  const slot = firstEmptySlot();
+  if (slot === -1) return;
+
+  state.currentGuess[slot] = colorId;
+  renderCurrentGuess();
+  updateSubmitButton();
+  persistProgress();
+}
+
+function tapPeg(index) {
+  if (state.gameOver) return;
+
+  if (state.currentGuess[index] === null) return;
+
+  state.currentGuess[index] = null;
+  renderCurrentGuess();
+  updateSubmitButton();
+  persistProgress();
+}
+
+function renderCurrentGuess() {
+  els.guessSlots.innerHTML = '';
+  state.currentGuess.forEach((colorId, index) => {
+    const peg = document.createElement('button');
+    peg.type = 'button';
+    peg.className = 'peg' + (colorId === null ? ' empty' : '');
+    peg.setAttribute(
+      'aria-label',
+      colorId === null
+        ? `Slot ${index + 1}, empty`
+        : `Slot ${index + 1}, ${colorName(colorId)}, tap to remove`,
+    );
+    if (colorId !== null) peg.style.background = colorHex(colorId);
+    peg.addEventListener('click', () => tapPeg(index));
+    els.guessSlots.appendChild(peg);
+  });
+}
+
+function renderBoard() {
+  els.board.className = 'board';
+  renderBoardColumns(els.board, state.history);
+}
+
+function renderHistoryBoard(container, history) {
+  container.className = 'board completed-board';
+  renderBoardColumns(container, history, true);
+}
+
+function renderBoardColumns(container, history, staticBoard = false) {
+  container.innerHTML = '';
+
+  const leftCol = document.createElement('div');
+  leftCol.className = 'board-column';
+  leftCol.setAttribute('aria-label', 'Guesses 1 to 10');
+
+  const rightCol = document.createElement('div');
+  rightCol.className = 'board-column';
+  rightCol.setAttribute('aria-label', 'Guesses 11 to 20');
+
+  const half = CONFIG.maxGuesses / 2;
+  for (let i = 0; i < CONFIG.maxGuesses; i++) {
+    const row = createBoardRow(i + 1, history[i] ?? null, staticBoard);
+    (i < half ? leftCol : rightCol).appendChild(row);
+  }
+
+  container.appendChild(leftCol);
+  container.appendChild(rightCol);
+}
+
+function createBoardRow(guessNumber, entry, staticBoard = false) {
+  const row = document.createElement('div');
+  row.className = 'guess-row guess-row-compact';
+  if (entry) row.classList.add('completed');
+  else if (!staticBoard && guessNumber === state.history.length + 1 && !state.gameOver) {
+    row.classList.add('active');
+  }
+
+  const num = document.createElement('span');
+  num.className = 'guess-number';
+  num.textContent = guessNumber;
+  row.appendChild(num);
+
+  const pegs = document.createElement('div');
+  pegs.className = 'guess-pegs';
+  const colors = entry?.guess ?? Array(CONFIG.pegCount).fill(null);
+  colors.forEach((colorId) => {
+    const peg = document.createElement('div');
+    peg.className = 'peg peg-compact' + (colorId === null ? ' empty' : '');
+    if (colorId !== null) peg.style.background = colorHex(colorId);
+    peg.setAttribute('aria-hidden', 'true');
+    pegs.appendChild(peg);
+  });
+  row.appendChild(pegs);
+
+  const fb = document.createElement('div');
+  fb.className = 'feedback feedback-compact';
+  if (entry) {
+    fb.setAttribute('aria-label', `${entry.feedback.black} exact, ${entry.feedback.white} partial`);
+    for (let i = 0; i < entry.feedback.black; i++) {
+      const p = document.createElement('div');
+      p.className = 'feedback-peg black';
+      fb.appendChild(p);
+    }
+    for (let i = 0; i < entry.feedback.white; i++) {
+      const p = document.createElement('div');
+      p.className = 'feedback-peg white';
+      fb.appendChild(p);
+    }
+  }
+  row.appendChild(fb);
+
+  return row;
+}
+
+function updateSubmitButton() {
+  const complete = state.currentGuess.every((c) => c !== null);
+  els.submitBtn.disabled = !complete || state.gameOver;
+}
+
+function submitGuess() {
+  if (state.gameOver) return;
+  if (!state.currentGuess.every((c) => c !== null)) return;
+
+  const feedback = scoreGuess(state.secret, state.currentGuess);
+  state.history.push({
+    guess: [...state.currentGuess],
+    feedback,
+  });
+
+  const won = isWinningGuess(state.secret, state.currentGuess);
+  const outOfGuesses = state.history.length >= CONFIG.maxGuesses;
+
+  if (won || outOfGuesses) {
+    endGame(won);
+    return;
+  }
+
+  state.currentGuess = Array(CONFIG.pegCount).fill(null);
+  renderBoard();
+  renderCurrentGuess();
+  updateSubmitButton();
+  persistProgress();
+}
+
+function endGame(won) {
+  state.gameOver = true;
+
+  state.stats = recordGameResult(state.stats, state.dateKey, {
+    won,
+    guessCount: state.history.length,
+    history: state.history,
+    ...(!won && { revealedCode: state.secret.map(colorName) }),
+  });
+
+  renderBoard();
+  els.submitBtn.disabled = true;
+
+  showResultModal(won);
+}
+
+function showResultModal(won) {
+  els.resultTitle.textContent = won ? 'You got it!' : 'Game over';
+  els.resultSubtitle.textContent = won
+    ? `Solved in ${state.history.length} ${state.history.length === 1 ? 'guess' : 'guesses'}`
+    : `The code was ${state.secret.map(colorName).join(', ')}`;
+
+  els.resultModal.showModal();
+}
+
+function showStatsModal() {
+  const s = state.stats;
+  document.getElementById('stat-played').textContent = s.gamesPlayed;
+  document.getElementById('stat-win-pct').textContent = winPercentage(s);
+  document.getElementById('stat-streak').textContent = s.currentStreak;
+  document.getElementById('stat-max-streak').textContent = s.maxStreak;
+
+  const dist = document.getElementById('distribution');
+  dist.innerHTML = '';
+  const maxCount = Math.max(1, ...s.guessDistribution);
+
+  s.guessDistribution.forEach((count, i) => {
+    const row = document.createElement('div');
+    row.className = 'dist-row';
+
+    const label = document.createElement('span');
+    label.className = 'dist-label';
+    label.textContent = i + 1;
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'dist-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'dist-bar';
+    if (count > 0 && count === maxCount) bar.classList.add('highlight');
+    bar.style.width = count > 0 ? `${(count / maxCount) * 100}%` : '0';
+    barWrap.appendChild(bar);
+
+    const countEl = document.createElement('span');
+    countEl.className = 'dist-count';
+    countEl.textContent = count;
+
+    row.appendChild(label);
+    row.appendChild(barWrap);
+    row.appendChild(countEl);
+    dist.appendChild(row);
+  });
+
+  document.getElementById('next-puzzle').textContent = 'Come back tomorrow for a new puzzle!';
+  els.statsModal.showModal();
+}
+
+function getShareContent() {
+  const todayGame = getTodayGame(state.stats, state.dateKey);
+  return buildShareTextWithUrl(
+    {
+      puzzleNumber: state.puzzleNumber,
+      won: todayGame?.won ?? false,
+      guessCount: todayGame?.guessCount ?? state.history.length,
+      history: todayGame?.history ?? state.history,
+    },
+    window.location.href.split('?')[0],
+  );
+}
+
+async function shareScore() {
+  const text = getShareContent();
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ text });
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Copied to clipboard!');
+  } catch {
+    showToast('Unable to share');
+  }
+}
+
+function showToast(message) {
+  els.toast.textContent = message;
+  els.toast.classList.remove('hidden');
+  setTimeout(() => els.toast.classList.add('hidden'), 2000);
+}
+
+function persistProgress() {
+  saveInProgress(state.stats, state.dateKey, {
+    history: state.history,
+    currentGuess: state.currentGuess,
+  });
+}
+
+function bindEvents() {
+  els.submitBtn.addEventListener('click', submitGuess);
+
+  els.shareBtn.addEventListener('click', shareScore);
+  els.statsBtn.addEventListener('click', showStatsModal);
+  els.statsClose.addEventListener('click', () => els.statsModal.close());
+
+  els.resultShareBtn.addEventListener('click', shareScore);
+  els.resultStatsBtn.addEventListener('click', () => {
+    els.resultModal.close();
+    showStatsModal();
+  });
+  els.resultCloseBtn.addEventListener('click', () => {
+    els.resultModal.close();
+    showCompletedView(getTodayGame(state.stats, state.dateKey));
+  });
+
+  els.statsModal.addEventListener('click', (e) => {
+    if (e.target === els.statsModal) els.statsModal.close();
+  });
+
+  els.introPlayBtn.addEventListener('click', () => {
+    markIntroSeen();
+    els.introModal.close();
+  });
+
+  els.helpBtn.addEventListener('click', showIntro);
+
+  els.themeBtn.addEventListener('click', () => {
+    toggleTheme();
+    syncThemeToggle();
+  });
+}
+
+init();
