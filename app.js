@@ -38,6 +38,7 @@ const els = {
   palette: document.getElementById('palette'),
   completedView: document.getElementById('completed-view'),
   completedMessage: document.getElementById('completed-message'),
+  completedSecret: document.getElementById('completed-secret'),
   completedBoard: document.getElementById('completed-board'),
   shareBtn: document.getElementById('share-btn'),
   statsBtn: document.getElementById('stats-btn'),
@@ -47,6 +48,7 @@ const els = {
   resultModal: document.getElementById('result-modal'),
   resultTitle: document.getElementById('result-title'),
   resultSubtitle: document.getElementById('result-subtitle'),
+  resultSecret: document.getElementById('result-secret'),
   resultShareBtn: document.getElementById('result-share-btn'),
   resultStatsBtn: document.getElementById('result-stats-btn'),
   resultCloseBtn: document.getElementById('result-close-btn'),
@@ -115,11 +117,34 @@ function showCompletedView(game) {
 
   if (game.won) {
     els.completedMessage.textContent = `You solved it in ${game.guessCount} ${game.guessCount === 1 ? 'guess' : 'guesses'}!`;
+    els.completedSecret.classList.add('hidden');
+    els.completedSecret.innerHTML = '';
   } else {
-    els.completedMessage.textContent = `Better luck tomorrow! The code was ${game.revealedCode?.join(', ') ?? 'hidden'}.`;
+    els.completedMessage.textContent = 'Better luck next time!';
+    renderSecretCode(els.completedSecret, normalizeSecretCode(game.revealedCode));
+    els.completedSecret.classList.remove('hidden');
   }
 
   renderHistoryBoard(els.completedBoard, game.history);
+}
+
+function normalizeSecretCode(revealedCode) {
+  if (!revealedCode?.length) return null;
+  if (typeof revealedCode[0] === 'number') return revealedCode;
+  return revealedCode.map((name) => COLORS.find((c) => c.name === name)?.id ?? 0);
+}
+
+function renderSecretCode(container, secret) {
+  container.innerHTML = '';
+  if (!secret) return;
+
+  secret.forEach((colorId) => {
+    const peg = document.createElement('div');
+    peg.className = 'secret-peg';
+    peg.style.background = colorHex(colorId);
+    peg.setAttribute('aria-label', colorName(colorId));
+    container.appendChild(peg);
+  });
 }
 
 function colorName(colorId) {
@@ -302,7 +327,7 @@ function endGame(won) {
     won,
     guessCount: state.history.length,
     history: state.history,
-    ...(!won && { revealedCode: state.secret.map(colorName) }),
+    ...(!won && { revealedCode: [...state.secret] }),
   });
 
   renderBoard();
@@ -315,7 +340,15 @@ function showResultModal(won) {
   els.resultTitle.textContent = won ? 'You got it!' : 'Game over';
   els.resultSubtitle.textContent = won
     ? `Solved in ${state.history.length} ${state.history.length === 1 ? 'guess' : 'guesses'}`
-    : `The code was ${state.secret.map(colorName).join(', ')}`;
+    : 'Better luck next time!';
+
+  if (won) {
+    els.resultSecret.classList.add('hidden');
+    els.resultSecret.innerHTML = '';
+  } else {
+    renderSecretCode(els.resultSecret, state.secret);
+    els.resultSecret.classList.remove('hidden');
+  }
 
   els.resultModal.showModal();
 }

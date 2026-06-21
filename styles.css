@@ -656,6 +656,28 @@ body {
   margin: 0 0 16px;
 }
 
+.secret-code {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: -8px 0 20px;
+}
+
+.secret-code.hidden {
+  display: none;
+}
+
+.secret-peg {
+  width: clamp(36px, 10vw, 48px);
+  height: clamp(36px, 10vw, 48px);
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .secret-peg {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
 .modal-footer {
   text-align: center;
   color: var(--text-muted);
