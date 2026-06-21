@@ -123,6 +123,14 @@ export function scoreGuess(secret, guess) {
   return { black, white };
 }
 
+/** Exact (black) pegs always precede partial (white) pegs in display order. */
+export function orderedFeedbackPegTypes({ black, white }) {
+  return [
+    ...Array(black).fill('black'),
+    ...Array(white).fill('white'),
+  ];
+}
+
 export function isWinningGuess(secret, guess) {
   return guess.every((color, i) => color === secret[i]);
 }
@@ -216,9 +224,10 @@ export function buildShareText({ puzzleNumber, won, guessCount, history }) {
   const lines = [`Daily Mastermind #${puzzleNumber} ${won ? guessCount : 'X'}/${CONFIG.maxGuesses}`];
 
   for (const row of history) {
-    const blacks = '⬛'.repeat(row.feedback.black);
-    const whites = '⬜'.repeat(row.feedback.white);
-    lines.push(blacks + whites || '·');
+    const pegs = orderedFeedbackPegTypes(row.feedback)
+      .map((type) => (type === 'black' ? '⬛' : '⬜'))
+      .join('');
+    lines.push(pegs || '·');
   }
 
   return lines.join('\n');

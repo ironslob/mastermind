@@ -18,6 +18,7 @@ import {
   getTheme,
   setTheme,
   toggleTheme,
+  orderedFeedbackPegTypes,
 } from './game.js';
 
 const state = {
@@ -296,20 +297,29 @@ function createBoardRow(guessNumber, entry, staticBoard = false) {
   fb.className = 'feedback feedback-compact';
   if (entry) {
     fb.setAttribute('aria-label', `${entry.feedback.black} exact, ${entry.feedback.white} partial`);
-    for (let i = 0; i < entry.feedback.black; i++) {
-      const p = document.createElement('div');
-      p.className = 'feedback-peg black';
-      fb.appendChild(p);
-    }
-    for (let i = 0; i < entry.feedback.white; i++) {
-      const p = document.createElement('div');
-      p.className = 'feedback-peg white';
-      fb.appendChild(p);
-    }
+    appendFeedbackPegs(fb, entry.feedback);
   }
   row.appendChild(fb);
 
   return row;
+}
+
+function appendFeedbackPegs(container, feedback) {
+  const types = orderedFeedbackPegTypes(feedback);
+
+  const slots = Array.from({ length: 4 }, (_, index) => {
+    const slot = document.createElement('div');
+    slot.className = 'feedback-slot';
+    const type = types[index];
+    if (type) {
+      const peg = document.createElement('div');
+      peg.className = `feedback-peg ${type}`;
+      slot.appendChild(peg);
+    }
+    return slot;
+  });
+
+  slots.forEach((slot) => container.appendChild(slot));
 }
 
 function updateSubmitButton() {
