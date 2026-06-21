@@ -81,30 +81,32 @@
     </div>
   </dialog>
 
-  <dialog id="stats-modal" class="modal">
+  <dialog id="stats-modal" class="modal stats-modal">
     <div class="modal-content">
       <button type="button" class="modal-close" id="stats-close" aria-label="Close">&times;</button>
-      <h2>Statistics</h2>
-      <div class="stats-grid">
-        <div class="stat">
-          <span class="stat-value" id="stat-played">0</span>
-          <span class="stat-label">Played</span>
+      <div class="stats-modal-body">
+        <h2>Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat">
+            <span class="stat-value" id="stat-played">0</span>
+            <span class="stat-label">Played</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-win-pct">0</span>
+            <span class="stat-label">Win %</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-streak">0</span>
+            <span class="stat-label">Streak</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-max-streak">0</span>
+            <span class="stat-label">Max</span>
+          </div>
         </div>
-        <div class="stat">
-          <span class="stat-value" id="stat-win-pct">0</span>
-          <span class="stat-label">Win %</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value" id="stat-streak">0</span>
-          <span class="stat-label">Streak</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value" id="stat-max-streak">0</span>
-          <span class="stat-label">Max</span>
-        </div>
+        <h3>Guess Distribution</h3>
+        <div id="distribution" class="distribution"></div>
       </div>
-      <h3>Guess Distribution</h3>
-      <div id="distribution" class="distribution"></div>
       <button type="button" id="clear-stats-btn" class="clear-stats-btn">Clear stats</button>
       <p class="modal-footer" id="next-puzzle"></p>
     </div>
@@ -126,7 +128,6 @@
       <h2 id="result-title"></h2>
       <p id="result-subtitle" class="result-subtitle"></p>
       <div id="result-secret" class="secret-code hidden" aria-label="Today's code"></div>
-      <div id="result-stats" class="stats-grid"></div>
       <div class="action-row">
         <button type="button" id="result-share-btn" class="share-btn">Share</button>
         <button type="button" id="result-stats-btn" class="stats-btn">Stats</button>
