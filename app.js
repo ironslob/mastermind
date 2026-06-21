@@ -364,31 +364,36 @@ function showStatsModal() {
   dist.innerHTML = '';
   const maxCount = Math.max(1, ...s.guessDistribution);
 
-  s.guessDistribution.forEach((count, i) => {
-    const row = document.createElement('div');
-    row.className = 'dist-row';
+  const chart = document.createElement('div');
+  chart.className = 'dist-chart';
 
-    const label = document.createElement('span');
-    label.className = 'dist-label';
-    label.textContent = i + 1;
+  s.guessDistribution.forEach((count, i) => {
+    const col = document.createElement('div');
+    col.className = 'dist-bar-col';
+
+    const countEl = document.createElement('span');
+    countEl.className = 'dist-count';
+    countEl.textContent = count > 0 ? count : '';
 
     const barWrap = document.createElement('div');
     barWrap.className = 'dist-bar-wrap';
     const bar = document.createElement('div');
     bar.className = 'dist-bar';
     if (count > 0 && count === maxCount) bar.classList.add('highlight');
-    bar.style.width = count > 0 ? `${(count / maxCount) * 100}%` : '0';
+    bar.style.height = count > 0 ? `${(count / maxCount) * 100}%` : '0';
     barWrap.appendChild(bar);
 
-    const countEl = document.createElement('span');
-    countEl.className = 'dist-count';
-    countEl.textContent = count;
+    const label = document.createElement('span');
+    label.className = 'dist-label';
+    label.textContent = i + 1;
 
-    row.appendChild(label);
-    row.appendChild(barWrap);
-    row.appendChild(countEl);
-    dist.appendChild(row);
+    col.appendChild(countEl);
+    col.appendChild(barWrap);
+    col.appendChild(label);
+    chart.appendChild(col);
   });
+
+  dist.appendChild(chart);
 
   document.getElementById('next-puzzle').textContent = 'Come back tomorrow for a new puzzle!';
   els.statsModal.showModal();
@@ -407,24 +412,28 @@ function getShareContent() {
   );
 }
 
-async function shareScore() {
+async function shareScore(event) {
+  const btn = event?.currentTarget;
   const text = getShareContent();
-
-  if (navigator.share) {
-    try {
-      await navigator.share({ text });
-      return;
-    } catch (err) {
-      if (err.name === 'AbortError') return;
-    }
-  }
 
   try {
     await navigator.clipboard.writeText(text);
+    flashShareButton(btn);
     showToast('Copied to clipboard!');
   } catch {
-    showToast('Unable to share');
+    showToast('Unable to copy');
   }
+}
+
+function flashShareButton(btn) {
+  if (!btn) return;
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = original;
+    btn.disabled = false;
+  }, 2000);
 }
 
 function showToast(message) {

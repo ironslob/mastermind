@@ -485,6 +485,22 @@ body {
   margin: 0;
 }
 
+.action-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 10px;
+}
+
+.action-row .share-btn,
+.action-row .stats-btn {
+  flex: 1;
+  width: auto;
+  max-width: none;
+  margin-bottom: 0;
+}
+
 .share-btn,
 .stats-btn,
 .modal-dismiss {
@@ -499,6 +515,11 @@ body {
   margin-bottom: 10px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+.share-btn:disabled {
+  opacity: 0.85;
+  cursor: default;
 }
 
 .share-btn {
@@ -520,16 +541,18 @@ body {
 
 .toast {
   position: fixed;
-  bottom: calc(180px + var(--safe-bottom));
+  bottom: calc(24px + var(--safe-bottom));
   left: 50%;
   transform: translateX(-50%);
   background: var(--text);
-  color: white;
-  padding: 10px 20px;
+  color: var(--bg);
+  padding: 12px 20px;
   border-radius: 8px;
   font-size: 0.875rem;
-  z-index: 100;
+  font-weight: 600;
+  z-index: 1000;
   animation: fade-in 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 @keyframes fade-in {
@@ -606,48 +629,63 @@ body {
 }
 
 .distribution {
+  margin-top: 4px;
+}
+
+.dist-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 128px;
+  padding-top: 18px;
+}
+
+.dist-bar-col {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.dist-row {
-  display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.875rem;
-}
-
-.dist-label {
-  width: 16px;
-  text-align: right;
-  font-weight: 600;
+  height: 100%;
 }
 
 .dist-bar-wrap {
   flex: 1;
-  background: var(--slot-empty);
-  border-radius: 4px;
-  height: 20px;
-  overflow: hidden;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 0;
 }
 
 .dist-bar {
-  height: 100%;
+  width: 100%;
+  max-width: 28px;
   background: var(--accent);
-  border-radius: 4px;
-  min-width: 0;
-  transition: width 0.3s ease;
+  border-radius: 4px 4px 0 0;
+  min-height: 0;
+  transition: height 0.3s ease;
 }
 
 .dist-bar.highlight {
   background: var(--success);
 }
 
-.dist-count {
-  width: 24px;
-  font-size: 0.8rem;
+.dist-label {
+  margin-top: 6px;
+  font-size: 0.625rem;
+  font-weight: 600;
   color: var(--text-muted);
+  line-height: 1;
+}
+
+.dist-count {
+  min-height: 14px;
+  margin-bottom: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1;
 }
 
 .result-subtitle {
