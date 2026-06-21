@@ -10,6 +10,23 @@ python3 -m http.server 8765
 
 Then open [http://localhost:8765](http://localhost:8765).
 
+## Cache busting
+
+Browsers (especially mobile) aggressively cache static assets. This project appends a git commit hash to CSS and JS URLs, for example `styles.css?v=ae3593b`.
+
+Before pushing a release, run:
+
+```bash
+./scripts/inject-version.sh
+git add index.html app.js version.txt
+```
+
+If you deploy via **GitHub Actions** (`.github/workflows/pages.yml`), the workflow injects the version automatically on each push to `main`. Enable it under **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+If you deploy from the **`main` branch** directly, run the script yourself before each push so the updated query strings are committed.
+
+`index.html` also sends `Cache-Control: no-cache` so the shell page is revalidated and picks up new asset URLs.
+
 ## Terminology
 
 This project uses standard Mastermind vocabulary where possible. The table below is the canonical reference for docs, issues, and UI copy.

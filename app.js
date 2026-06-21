@@ -19,7 +19,7 @@ import {
   setTheme,
   toggleTheme,
   orderedFeedbackPegTypes,
-} from './game.js';
+} from './game.js?v=951d4d7';
 
 const state = {
   dateKey: getDateKey(),
