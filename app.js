@@ -19,7 +19,7 @@ import {
   setTheme,
   toggleTheme,
   orderedFeedbackPegTypes,
-} from './game.js?v=753cb17';
+} from './game.js?v=e3eb5f5';
 
 const state = {
   dateKey: getDateKey(),
@@ -51,13 +51,6 @@ const els = {
   clearStatsModal: document.getElementById('clear-stats-modal'),
   clearStatsCancel: document.getElementById('clear-stats-cancel'),
   clearStatsConfirm: document.getElementById('clear-stats-confirm'),
-  resultModal: document.getElementById('result-modal'),
-  resultTitle: document.getElementById('result-title'),
-  resultSubtitle: document.getElementById('result-subtitle'),
-  resultSecret: document.getElementById('result-secret'),
-  resultShareBtn: document.getElementById('result-share-btn'),
-  resultStatsBtn: document.getElementById('result-stats-btn'),
-  resultCloseBtn: document.getElementById('result-close-btn'),
   introModal: document.getElementById('intro-modal'),
   introPlayBtn: document.getElementById('intro-play-btn'),
   helpBtn: document.getElementById('help-btn'),
@@ -362,27 +355,7 @@ function endGame(won) {
     ...(!won && { revealedCode: [...state.secret] }),
   });
 
-  renderBoard();
-  els.submitBtn.disabled = true;
-
-  showResultModal(won);
-}
-
-function showResultModal(won) {
-  els.resultTitle.textContent = won ? 'You got it!' : 'Game over';
-  els.resultSubtitle.textContent = won
-    ? `Solved in ${state.history.length} ${state.history.length === 1 ? 'guess' : 'guesses'}`
-    : 'Better luck next time!';
-
-  if (won) {
-    els.resultSecret.classList.add('hidden');
-    els.resultSecret.innerHTML = '';
-  } else {
-    renderSecretCode(els.resultSecret, state.secret);
-    els.resultSecret.classList.remove('hidden');
-  }
-
-  els.resultModal.showModal();
+  showCompletedView(getTodayGame(state.stats, state.dateKey));
 }
 
 function showStatsModal() {
@@ -512,16 +485,6 @@ function bindEvents() {
   els.clearStatsBtn.addEventListener('click', confirmClearStats);
   els.clearStatsCancel.addEventListener('click', () => els.clearStatsModal.close());
   els.clearStatsConfirm.addEventListener('click', handleClearStats);
-
-  els.resultShareBtn.addEventListener('click', shareScore);
-  els.resultStatsBtn.addEventListener('click', () => {
-    els.resultModal.close();
-    showStatsModal();
-  });
-  els.resultCloseBtn.addEventListener('click', () => {
-    els.resultModal.close();
-    showCompletedView(getTodayGame(state.stats, state.dateKey));
-  });
 
   els.statsModal.addEventListener('click', (e) => {
     if (e.target === els.statsModal) els.statsModal.close();

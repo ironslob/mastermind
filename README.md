@@ -74,7 +74,7 @@ User-facing copy uses plain language (*correct colour, correct position*) rather
 | Term | Meaning | Code / markup |
 | --- | --- | --- |
 | **Play dock** (or **input dock**) | Bottom panel during active play: Submit, current guess, palette | `#play-dock.input-dock` |
-| **Completed dock** | Bottom panel after win/loss: message, secret code, Share/Stats | `#completed-dock.input-dock` |
+| **Completed dock** | Bottom panel after win/loss: message, secret code (on loss), Share/Stats | `#completed-dock.input-dock` |
 | **Current guess** | The four slots the player is filling before Submit | `#current-row` |
 | **Guess slot** | One of the four interactive positions in the current guess (numbered 1–4) | `#guess-slots .peg` |
 | **Palette** | The row of eight choosable colours | `#palette.palette` |
@@ -87,7 +87,6 @@ User-facing copy uses plain language (*correct colour, correct position*) rather
 | --- | --- | --- |
 | **Header** | Title, puzzle info, theme toggle, help button | `.header` |
 | **Intro modal** | First-visit “How to play” dialog | `#intro-modal` |
-| **Result modal** | Win/loss summary with Share and Stats | `#result-modal` |
 | **Stats modal** | Played / win % / streaks / guess distribution | `#stats-modal` |
 | **Toast** | Brief clipboard confirmation after Share | `#toast` |
 

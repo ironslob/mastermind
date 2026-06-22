@@ -742,12 +742,6 @@ body {
   line-height: 1;
 }
 
-.result-subtitle {
-  text-align: center;
-  color: var(--text-muted);
-  margin: 0 0 16px;
-}
-
 .secret-code {
   display: flex;
   justify-content: center;
