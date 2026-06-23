@@ -18,6 +18,9 @@ export const CONFIG = {
 
 export const LAUNCH_DATE = new Date('2026-06-21T00:00:00');
 
+/** Bump when the daily code algorithm changes (invalidates prior puzzles). */
+const CODE_SEED_VERSION = 'mastermind-v2';
+
 const INTRO_SEEN_KEY = 'mastermind-intro-seen';
 const THEME_KEY = 'mastermind-theme';
 const STORAGE_KEY = 'mastermind-stats';
@@ -63,30 +66,43 @@ export function getPuzzleNumber(date = new Date()) {
   return diff + 1;
 }
 
-function hashString(str) {
-  let hash = 0;
+function fnv1a(str) {
+  let hash = 2166136261;
   for (let i = 0; i < str.length; i++) {
-    hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
 }
 
-function createRng(seed) {
-  let state = seed >>> 0;
-  return () => {
-    state = (Math.imul(1664525, state) + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
+/** SplitMix32 — good 32-bit mixing for small seeds (e.g. date strings). */
+function splitmix32(state) {
+  state = (state + 0x9e3779b9) >>> 0;
+  let z = state;
+  z = Math.imul(z ^ (z >>> 16), 0x85ebca6b) >>> 0;
+  z = Math.imul(z ^ (z >>> 13), 0xc2b2ae35) >>> 0;
+  return (z ^ (z >>> 16)) >>> 0;
+}
+
+function seededColor(dateKey, pegIndex) {
+  const seed = fnv1a(`${CODE_SEED_VERSION}-${dateKey}`);
+  const pegSalt = fnv1a(`peg-${pegIndex}`);
+  return splitmix32(seed ^ pegSalt) % COLORS.length;
+}
+
+function createStreamRng(dateKey) {
+  let state = fnv1a(`${CODE_SEED_VERSION}-${dateKey}`);
+  return () => splitmix32(state = splitmix32(state)) / 4294967296;
 }
 
 export function generateSecretCode(dateKey = getDateKey()) {
-  const rand = createRng(hashString(`mastermind-v1-${dateKey}`));
   const { pegCount, allowDuplicates } = CONFIG;
 
   if (allowDuplicates) {
-    return Array.from({ length: pegCount }, () => Math.floor(rand() * COLORS.length));
+    return Array.from({ length: pegCount }, (_, pegIndex) => seededColor(dateKey, pegIndex));
   }
 
+  const rand = createStreamRng(dateKey);
   const pool = COLORS.map((c) => c.id);
   const code = [];
   for (let i = 0; i < pegCount; i++) {

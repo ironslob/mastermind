@@ -10,6 +10,16 @@ python3 -m http.server 8765
 
 Then open [http://localhost:8765](http://localhost:8765).
 
+## Daily secret code
+
+Each puzzle’s code is derived deterministically from the calendar date — no server required.
+
+1. Build seed string `mastermind-v2-YYYY-MM-DD` (the `v2` prefix version-tags the algorithm).
+2. Hash with **FNV-1a** to a 32-bit seed.
+3. For each peg position, mix the seed with **SplitMix32** and take `mod 8` for a colour ID.
+
+Each peg is seeded independently so consecutive dates don’t share long runs of the same opening colour. With duplicates allowed, ~55–60% of codes contain at least one repeated colour (expected for fair dice).
+
 ## Cache busting
 
 Browsers (especially mobile) aggressively cache static assets. This project appends a git commit hash to CSS and JS URLs, for example `styles.css?v=ae3593b`.
