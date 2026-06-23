@@ -19,7 +19,7 @@ import {
   setTheme,
   toggleTheme,
   orderedFeedbackPegTypes,
-} from './game.js?v=9bb964c';
+} from './game.js?v=dec2194';
 
 const state = {
   dateKey: getDateKey(),
@@ -52,7 +52,11 @@ const els = {
   clearStatsCancel: document.getElementById('clear-stats-cancel'),
   clearStatsConfirm: document.getElementById('clear-stats-confirm'),
   introModal: document.getElementById('intro-modal'),
-  introPlayBtn: document.getElementById('intro-play-btn'),
+  introTitle: document.getElementById('intro-title'),
+  introPages: document.getElementById('intro-pages'),
+  introBack: document.getElementById('intro-back'),
+  introPlay: document.getElementById('intro-play'),
+  introNext: document.getElementById('intro-next'),
   helpBtn: document.getElementById('help-btn'),
   themeBtn: document.getElementById('theme-btn'),
 };
@@ -71,7 +75,250 @@ function init() {
 }
 
 function showIntro() {
+  buildIntroPages();
+  showIntroPage(0);
   els.introModal.showModal();
+}
+
+const INTRO_TITLES = ['How to play'];
+
+const INTRO_EXAMPLES = [
+  {
+    title: 'Exact and partial pegs',
+    secret: [0, 1, 2, 3],
+    guess: [0, 2, 1, 3],
+    lead:
+      'Each guess narrows the possibilities. The feedback tells you what to keep, move, or discard.',
+    tip:
+      'Two exact pegs (●) lock those colours into the right slots. Two partial pegs (○) mean Green and Rose are in the code but in the wrong positions — swap them on your next guess.',
+  },
+  {
+    title: 'Ruling colours out',
+    secret: [0, 1, 2, 3],
+    guess: [4, 5, 6, 7],
+    tip:
+      'No feedback at all means none of these four colours are in the secret. Cross them off mentally and try only the colours you have not used yet.',
+  },
+  {
+    title: 'Duplicates in the code',
+    secret: [0, 0, 1, 2],
+    guess: [0, 0, 0, 0],
+    tip:
+      'Two exact pegs here means two positions are correct, but with duplicates allowed you still need to work out which Blues belong where. Follow-up guesses that change one slot at a time narrow it down.',
+  },
+];
+
+const INTRO_DEDUCTION = {
+  title: 'Combining clues',
+  secret: [0, 1, 2, 3],
+  guesses: [
+    {
+      guess: [4, 5, 6, 7],
+      hint: 'No feedback — Cyan, Purple, Orange, and Grey are not in the secret.',
+    },
+    {
+      guess: [0, 4, 5, 6],
+      hint: 'Blue is exact in slot 1. The other three slots still need work.',
+    },
+    {
+      guess: [0, 1, 2, 6],
+      hint: 'Slots 1–3 are Blue, Rose, and Green. Only Gold fits the last slot.',
+    },
+  ],
+  summary:
+    'Each guess adds constraints. Stack the clues and only one code satisfies them all.',
+};
+
+let introPage = 0;
+let introPageCount = 0;
+let introPagesBuilt = false;
+
+function renderIntroExamplePegs(colorIds) {
+  const row = document.createElement('div');
+  row.className = 'intro-example-pegs';
+  colorIds.forEach((colorId) => {
+    const peg = document.createElement('div');
+    peg.className = 'intro-example-peg';
+    peg.style.background = colorHex(colorId);
+    peg.setAttribute('aria-label', colorName(colorId));
+    row.appendChild(peg);
+  });
+  return row;
+}
+
+function renderIntroExampleFeedback(feedback) {
+  const box = document.createElement('div');
+  box.className = 'intro-example-feedback';
+  box.setAttribute(
+    'aria-label',
+    `${feedback.black} exact, ${feedback.white} partial`,
+  );
+
+  const types = orderedFeedbackPegTypes(feedback);
+  for (let i = 0; i < 4; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'intro-example-feedback-slot';
+    const type = types[i];
+    if (type) {
+      const peg = document.createElement('div');
+      peg.className = `intro-example-feedback-peg ${type}`;
+      slot.appendChild(peg);
+    }
+    box.appendChild(slot);
+  }
+
+  return box;
+}
+
+function buildIntroExamplePage(example, index) {
+  const feedback = scoreGuess(example.secret, example.guess);
+  const page = document.createElement('section');
+  page.className = 'intro-page hidden';
+  page.dataset.introPage = String(index + 1);
+
+  const body = document.createElement('div');
+  body.className = 'intro-example-page';
+
+  if (example.lead) {
+    const lead = document.createElement('p');
+    lead.className = 'intro-examples-lead';
+    lead.textContent = example.lead;
+    body.appendChild(lead);
+  }
+
+  const secretLine = document.createElement('div');
+  secretLine.className = 'intro-example-line';
+  const secretLabel = document.createElement('span');
+  secretLabel.className = 'intro-example-label';
+  secretLabel.textContent = 'Secret';
+  secretLine.appendChild(secretLabel);
+  secretLine.appendChild(renderIntroExamplePegs(example.secret));
+  body.appendChild(secretLine);
+
+  const guessLine = document.createElement('div');
+  guessLine.className = 'intro-example-line';
+  const guessLabel = document.createElement('span');
+  guessLabel.className = 'intro-example-label';
+  guessLabel.textContent = 'Guess';
+  guessLine.appendChild(guessLabel);
+  guessLine.appendChild(renderIntroExamplePegs(example.guess));
+  guessLine.appendChild(renderIntroExampleFeedback(feedback));
+  body.appendChild(guessLine);
+
+  const scoreText = document.createElement('p');
+  scoreText.className = 'intro-example-score';
+  scoreText.textContent = `${feedback.black} exact · ${feedback.white} partial`;
+  body.appendChild(scoreText);
+
+  const tip = document.createElement('p');
+  tip.className = 'intro-example-tip';
+  tip.innerHTML = `<strong>Why it helps:</strong> ${example.tip}`;
+  body.appendChild(tip);
+
+  page.appendChild(body);
+  INTRO_TITLES.push(`Example ${index + 1}: ${example.title}`);
+  return page;
+}
+
+function buildIntroDeductionPage(pageIndex) {
+  const page = document.createElement('section');
+  page.className = 'intro-page hidden';
+  page.dataset.introPage = String(pageIndex);
+
+  const body = document.createElement('div');
+  body.className = 'intro-deduction-page';
+
+  const lead = document.createElement('p');
+  lead.className = 'intro-examples-lead';
+  lead.textContent =
+    'No single guess reveals the code. Each row adds a clue — together they narrow it to one answer.';
+  body.appendChild(lead);
+
+  const rows = document.createElement('div');
+  rows.className = 'intro-deduction-rows';
+
+  INTRO_DEDUCTION.guesses.forEach((entry, index) => {
+    const feedback = scoreGuess(INTRO_DEDUCTION.secret, entry.guess);
+    const entryEl = document.createElement('div');
+    entryEl.className = 'intro-deduction-entry';
+
+    const line = document.createElement('div');
+    line.className = 'intro-deduction-line';
+
+    const num = document.createElement('span');
+    num.className = 'intro-deduction-num';
+    num.textContent = index + 1;
+    line.appendChild(num);
+    line.appendChild(renderIntroExamplePegs(entry.guess));
+    line.appendChild(renderIntroExampleFeedback(feedback));
+    entryEl.appendChild(line);
+
+    const hint = document.createElement('p');
+    hint.className = 'intro-deduction-hint';
+    hint.textContent = entry.hint;
+    entryEl.appendChild(hint);
+
+    rows.appendChild(entryEl);
+  });
+  body.appendChild(rows);
+
+  const secretLine = document.createElement('div');
+  secretLine.className = 'intro-deduction-secret';
+  const secretLabel = document.createElement('span');
+  secretLabel.className = 'intro-example-label';
+  secretLabel.textContent = 'Secret';
+  secretLine.appendChild(secretLabel);
+  secretLine.appendChild(renderIntroExamplePegs(INTRO_DEDUCTION.secret));
+  body.appendChild(secretLine);
+
+  const summary = document.createElement('p');
+  summary.className = 'intro-example-tip';
+  summary.innerHTML = `<strong>Why it helps:</strong> ${INTRO_DEDUCTION.summary}`;
+  body.appendChild(summary);
+
+  page.appendChild(body);
+  INTRO_TITLES.push(INTRO_DEDUCTION.title);
+  return page;
+}
+
+function buildIntroPages() {
+  if (introPagesBuilt) return;
+
+  INTRO_EXAMPLES.forEach((example, index) => {
+    els.introPages.appendChild(buildIntroExamplePage(example, index));
+  });
+
+  const deductionPageIndex = 1 + INTRO_EXAMPLES.length;
+  els.introPages.appendChild(buildIntroDeductionPage(deductionPageIndex));
+
+  introPageCount = deductionPageIndex + 1;
+  introPagesBuilt = true;
+}
+
+function showIntroPage(pageIndex) {
+  introPage = pageIndex;
+
+  els.introPages.querySelectorAll('.intro-page').forEach((page) => {
+    const active = Number(page.dataset.introPage) === pageIndex;
+    page.classList.toggle('hidden', !active);
+  });
+
+  els.introTitle.textContent = INTRO_TITLES[pageIndex];
+  els.introBack.disabled = pageIndex === 0;
+  els.introNext.disabled = pageIndex >= introPageCount - 1;
+}
+
+function introStartPlay() {
+  markIntroSeen();
+  els.introModal.close();
+}
+
+function introGoNext() {
+  if (introPage < introPageCount - 1) showIntroPage(introPage + 1);
+}
+
+function introGoBack() {
+  if (introPage > 0) showIntroPage(introPage - 1);
 }
 
 function syncThemeToggle() {
@@ -490,10 +737,9 @@ function bindEvents() {
     if (e.target === els.statsModal) els.statsModal.close();
   });
 
-  els.introPlayBtn.addEventListener('click', () => {
-    markIntroSeen();
-    els.introModal.close();
-  });
+  els.introBack.addEventListener('click', introGoBack);
+  els.introPlay.addEventListener('click', introStartPlay);
+  els.introNext.addEventListener('click', introGoNext);
 
   els.helpBtn.addEventListener('click', showIntro);
 

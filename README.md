@@ -96,7 +96,7 @@ User-facing copy uses plain language (*correct colour, correct position*) rather
 | Term | Meaning | Code / markup |
 | --- | --- | --- |
 | **Header** | Title, puzzle info, theme toggle, help button | `.header` |
-| **Intro modal** | First-visit “How to play” dialog | `#intro-modal` |
+| **Intro modal** | Paginated first-visit tutorial (rules + scoring examples) | `#intro-modal` |
 | **Stats modal** | Played / win % / streaks / guess distribution | `#stats-modal` |
 | **Toast** | Brief clipboard confirmation after Share | `#toast` |
 

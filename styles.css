@@ -446,12 +446,32 @@ body {
 
 .intro-modal .modal-content {
   max-height: 85dvh;
-  overflow-y: auto;
+  overflow: hidden;
+}
+
+.intro-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 320px;
+}
+
+.intro-modal-content h2 {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+
+.intro-pages {
+  flex: 1;
+  min-height: 0;
+}
+
+.intro-page {
+  height: 100%;
 }
 
 .intro-body {
   font-size: 0.9375rem;
-  margin-bottom: 16px;
 }
 
 .intro-body p {
@@ -496,10 +516,160 @@ body {
   background: #ffffff;
 }
 
-.intro-modal .share-btn {
-  align-self: stretch;
-  max-width: none;
+.intro-example-page,
+.intro-deduction-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  text-align: left;
+}
+
+.intro-examples-lead {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.intro-example-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.intro-example-label {
+  flex: 0 0 44px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.intro-example-pegs {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.intro-example-peg {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .intro-example-peg {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.intro-example-feedback {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 3px;
+  border-radius: 6px;
+  background: #a3a3a3;
+  box-sizing: border-box;
+}
+
+.intro-example-feedback-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-example-feedback-peg {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.intro-example-feedback-peg.black {
+  background: #000000;
+}
+
+.intro-example-feedback-peg.white {
+  background: #ffffff;
+}
+
+.intro-example-score {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.intro-example-tip {
   margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.intro-example-tip strong {
+  font-weight: 600;
+}
+
+.intro-deduction-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.intro-deduction-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.intro-deduction-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.intro-deduction-num {
+  flex: 0 0 14px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.intro-deduction-hint {
+  margin: 0 0 0 22px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.intro-deduction-secret {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.intro-deduction-page .intro-example-tip {
+  margin-top: 12px;
+}
+
+.intro-nav {
+  flex-shrink: 0;
+}
+
+.intro-nav.action-row {
+  width: 100%;
+  max-width: none;
+  margin: 24px 0 0;
 }
 
 .action-row {
@@ -548,6 +718,11 @@ body {
   background: var(--surface);
   color: var(--text);
   border: 1.5px solid var(--border);
+}
+
+.stats-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .modal-dismiss {
