@@ -19,7 +19,8 @@ import {
   setTheme,
   toggleTheme,
   orderedFeedbackPegTypes,
-} from './game.js?v=dec2194';
+  // buildWalkthrough,
+} from './game.js?v=4e6cf66';
 
 const state = {
   dateKey: getDateKey(),
@@ -44,6 +45,13 @@ const els = {
   completedSecret: document.getElementById('completed-secret'),
   shareBtn: document.getElementById('share-btn'),
   statsBtn: document.getElementById('stats-btn'),
+  // reviewBtn: document.getElementById('review-btn'),
+  // reviewModal: document.getElementById('review-modal'),
+  // reviewTitle: document.getElementById('review-title'),
+  // reviewPages: document.getElementById('review-pages'),
+  // reviewBack: document.getElementById('review-back'),
+  // reviewClose: document.getElementById('review-close'),
+  // reviewNext: document.getElementById('review-next'),
   toast: document.getElementById('toast'),
   statsModal: document.getElementById('stats-modal'),
   statsClose: document.getElementById('stats-close'),
@@ -321,6 +329,143 @@ function introGoBack() {
   if (introPage > 0) showIntroPage(introPage - 1);
 }
 
+/*
+ * Post-game guess review walkthrough (disabled — needs refinement).
+let reviewPage = 0;
+let reviewPageCount = 0;
+const reviewTitles = [];
+
+function resolveCompletedSecret(game) {
+  if (game.revealedCode) return normalizeSecretCode(game.revealedCode);
+  if (game.won && game.history?.length) {
+    return [...game.history[game.history.length - 1].guess];
+  }
+  return [...state.secret];
+}
+
+function buildReviewGuessPage(step, isFirst) {
+  const page = document.createElement('section');
+  page.className = 'intro-page';
+
+  const body = document.createElement('div');
+  body.className = 'intro-example-page';
+
+  if (isFirst) {
+    const lead = document.createElement('p');
+    lead.className = 'intro-examples-lead';
+    lead.textContent =
+      'Each guess adds clues. Here is what your feedback revealed at every step.';
+    body.appendChild(lead);
+  }
+
+  const line = document.createElement('div');
+  line.className = 'intro-deduction-line';
+
+  const num = document.createElement('span');
+  num.className = 'intro-deduction-num';
+  num.textContent = step.guessNumber;
+  line.appendChild(num);
+  line.appendChild(renderIntroExamplePegs(step.guess));
+  line.appendChild(renderIntroExampleFeedback(step.feedback));
+  body.appendChild(line);
+
+  const scoreText = document.createElement('p');
+  scoreText.className = 'intro-example-score';
+  scoreText.textContent = `${step.feedback.black} exact · ${step.feedback.white} partial`;
+  body.appendChild(scoreText);
+
+  const explanation = document.createElement('p');
+  explanation.className = 'intro-example-tip';
+  explanation.innerHTML = `<strong>What this told you:</strong> ${step.explanation}`;
+  body.appendChild(explanation);
+
+  page.appendChild(body);
+  return page;
+}
+
+function buildReviewSecretPage(secret, won, guessCount) {
+  const page = document.createElement('section');
+  page.className = 'intro-page';
+
+  const body = document.createElement('div');
+  body.className = 'intro-example-page';
+
+  const lead = document.createElement('p');
+  lead.className = 'intro-examples-lead';
+  lead.textContent = won
+    ? `You solved it in ${guessCount} ${guessCount === 1 ? 'guess' : 'guesses'}. Stacked together, your clues could only mean one code.`
+    : 'Stacked together, your clues pointed to exactly one possible code.';
+  body.appendChild(lead);
+
+  const secretLine = document.createElement('div');
+  secretLine.className = 'intro-example-line';
+  const secretLabel = document.createElement('span');
+  secretLabel.className = 'intro-example-label';
+  secretLabel.textContent = 'Secret';
+  secretLine.appendChild(secretLabel);
+  secretLine.appendChild(renderIntroExamplePegs(secret));
+  body.appendChild(secretLine);
+
+  const summary = document.createElement('p');
+  summary.className = 'intro-example-tip';
+  summary.innerHTML =
+    '<strong>Takeaway:</strong> Exact pegs lock positions, partial pegs tell you what to move, and empty feedback lets you rule colours out.';
+  body.appendChild(summary);
+
+  page.appendChild(body);
+  return page;
+}
+
+function buildReviewPages(history, secret, won) {
+  const { steps } = buildWalkthrough(secret, history);
+
+  els.reviewPages.innerHTML = '';
+  reviewTitles.length = 0;
+
+  steps.forEach((step, index) => {
+    els.reviewPages.appendChild(buildReviewGuessPage(step, index === 0));
+    reviewTitles.push(`Guess ${step.guessNumber}`);
+  });
+
+  els.reviewPages.appendChild(buildReviewSecretPage(secret, won, history.length));
+  reviewTitles.push('The secret code');
+
+  reviewPageCount = reviewTitles.length;
+}
+
+function showReviewPage(pageIndex) {
+  reviewPage = pageIndex;
+
+  els.reviewPages.querySelectorAll('.intro-page').forEach((page, index) => {
+    page.classList.toggle('hidden', index !== pageIndex);
+  });
+
+  els.reviewTitle.textContent = reviewTitles[pageIndex];
+  els.reviewBack.disabled = pageIndex === 0;
+  els.reviewNext.disabled = pageIndex >= reviewPageCount - 1;
+}
+
+function showReview() {
+  const game = getTodayGame(state.stats, state.dateKey);
+  if (!game?.history?.length) return;
+
+  const secret = resolveCompletedSecret(game);
+  if (!secret) return;
+
+  buildReviewPages(game.history, secret, game.won);
+  showReviewPage(0);
+  els.reviewModal.showModal();
+}
+
+function reviewGoNext() {
+  if (reviewPage < reviewPageCount - 1) showReviewPage(reviewPage + 1);
+}
+
+function reviewGoBack() {
+  if (reviewPage > 0) showReviewPage(reviewPage - 1);
+}
+*/
+
 function syncThemeToggle() {
   const theme = getTheme();
   setTheme(theme);
@@ -361,6 +506,7 @@ function restoreOrStart() {
 function showCompletedView(game) {
   state.history = game.history ?? [];
   state.gameOver = true;
+  // state.secret = resolveCompletedSecret(game);
 
   els.playDock.classList.add('hidden');
   els.completedDock.classList.remove('hidden');
@@ -727,6 +873,7 @@ function bindEvents() {
   els.submitBtn.addEventListener('click', submitGuess);
 
   els.shareBtn.addEventListener('click', shareScore);
+  // els.reviewBtn.addEventListener('click', showReview);
   els.statsBtn.addEventListener('click', showStatsModal);
   els.statsClose.addEventListener('click', () => els.statsModal.close());
   els.clearStatsBtn.addEventListener('click', confirmClearStats);
@@ -740,6 +887,10 @@ function bindEvents() {
   els.introBack.addEventListener('click', introGoBack);
   els.introPlay.addEventListener('click', introStartPlay);
   els.introNext.addEventListener('click', introGoNext);
+
+  // els.reviewBack.addEventListener('click', reviewGoBack);
+  // els.reviewClose.addEventListener('click', () => els.reviewModal.close());
+  // els.reviewNext.addEventListener('click', reviewGoNext);
 
   els.helpBtn.addEventListener('click', showIntro);
 

@@ -239,6 +239,13 @@ body {
   margin: 0;
 }
 
+/* Post-game guess review (disabled — needs refinement)
+.review-btn {
+  width: 100%;
+  margin: 0 0 10px;
+}
+*/
+
 .feedback {
   display: flex;
   flex-wrap: wrap;

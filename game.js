@@ -151,6 +151,107 @@ export function isWinningGuess(secret, guess) {
   return guess.every((color, i) => color === secret[i]);
 }
 
+/*
+ * Post-game guess review walkthrough (disabled — needs refinement).
+function colorLabel(colorId) {
+  return COLORS[colorId]?.name ?? 'Unknown';
+}
+
+function formatColorList(colorIds) {
+  const unique = [...new Set(colorIds)];
+  const names = unique.map(colorLabel);
+  if (names.length === 0) return '';
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
+}
+
+function describePartialMatches(secret, guess) {
+  const secretRemaining = [...secret];
+  const guessRemaining = [...guess];
+  const notes = [];
+
+  for (let i = 0; i < secret.length; i++) {
+    if (guess[i] === secret[i]) {
+      secretRemaining[i] = null;
+      guessRemaining[i] = null;
+    }
+  }
+
+  for (let i = 0; i < guessRemaining.length; i++) {
+    const color = guessRemaining[i];
+    if (color === null) continue;
+    const matchIdx = secretRemaining.indexOf(color);
+    if (matchIdx !== -1) {
+      notes.push(`${colorLabel(color)} is in the code but not in slot ${i + 1}.`);
+      secretRemaining[matchIdx] = null;
+    }
+  }
+
+  return notes;
+}
+
+function describeGuessFeedback(secret, guess, feedback) {
+  if (isWinningGuess(secret, guess)) {
+    return 'Every peg is exact — you found the code.';
+  }
+
+  const { black, white } = feedback;
+
+  if (black === 0 && white === 0) {
+    return `No feedback — ${formatColorList(guess)} ${[...new Set(guess)].length === 1 ? 'is' : 'are'} not in the secret.`;
+  }
+
+  const sentences = [];
+
+  for (let i = 0; i < guess.length; i++) {
+    if (guess[i] === secret[i]) {
+      sentences.push(`${colorLabel(guess[i])} in slot ${i + 1} is exact.`);
+    }
+  }
+
+  if (white > 0) {
+    sentences.push(...describePartialMatches(secret, guess));
+  }
+
+  const absent = [...new Set(guess.filter((colorId) => !secret.includes(colorId)))];
+  if (absent.length > 0) {
+    sentences.push(`${formatColorList(absent)} ${absent.length === 1 ? 'is' : 'are'} not in the secret.`);
+  }
+
+  if (sentences.length === 0) {
+    return `${black} exact and ${white} partial — use this to narrow the remaining slots.`;
+  }
+
+  return sentences.join(' ');
+}
+
+export function buildWalkthrough(secret, history) {
+  const eliminated = new Set();
+  const steps = history.map((entry, index) => {
+    const { guess, feedback } = entry;
+    const context =
+      index > 0 && eliminated.size > 0
+        ? `You had already ruled out ${formatColorList([...eliminated])}. `
+        : '';
+
+    if (feedback.black === 0 && feedback.white === 0) {
+      [...new Set(guess)].forEach((colorId) => eliminated.add(colorId));
+    }
+
+    return {
+      guessNumber: index + 1,
+      guess,
+      feedback,
+      explanation: context + describeGuessFeedback(secret, guess, feedback),
+      won: isWinningGuess(secret, guess),
+    };
+  });
+
+  return { secret, steps };
+}
+*/
+
 export function loadStats() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);

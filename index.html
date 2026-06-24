@@ -19,7 +19,7 @@
       if (meta) meta.content = theme === 'dark' ? '#121213' : '#fafafa';
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=dec2194">
+  <link rel="stylesheet" href="styles.css?v=4e6cf66">
 </head>
 <body>
   <div id="app">
@@ -55,6 +55,7 @@
       <div id="completed-dock" class="input-dock hidden">
         <p id="completed-message" class="completed-message"></p>
         <div id="completed-secret" class="secret-code hidden" aria-label="Today's code"></div>
+        <!-- <button type="button" id="review-btn" class="stats-btn review-btn">Review guesses</button> -->
         <div class="action-row">
           <button type="button" id="share-btn" class="share-btn">Share</button>
           <button type="button" id="stats-btn" class="stats-btn">Stats</button>
@@ -132,6 +133,20 @@
     </div>
   </dialog>
 
-  <script type="module" src="app.js?v=dec2194"></script>
+  <!-- Post-game guess review (disabled — needs refinement)
+  <dialog id="review-modal" class="modal intro-modal">
+    <div class="modal-content intro-modal-content">
+      <h2 id="review-title">Review guesses</h2>
+      <div class="intro-pages" id="review-pages"></div>
+      <div class="intro-nav action-row">
+        <button type="button" id="review-back" class="stats-btn" disabled>Back</button>
+        <button type="button" id="review-close" class="share-btn">Close</button>
+        <button type="button" id="review-next" class="stats-btn">Next</button>
+      </div>
+    </div>
+  </dialog>
+  -->
+
+  <script type="module" src="app.js?v=4e6cf66"></script>
 </body>
 </html>
